@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <title>光彩藝術網站｜讓你的照片變得更加豐富多彩</title>
+    <link href="static/img/favicon.ico" rel="shortcut icon" type="image/x-icon">
+     <meta name="author" content="Hello Phone" />
+  <meta name="description" content="光彩藝術網站" />
+  <meta name="keywords" content="藝術,art,website,web,光彩藝術" />
+  <meta property="og:title" content="光彩藝術網站" />
+  <meta property="og:description" content="讓你的照片變得更加豐富多彩" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://cdn.discordapp.com/emojis/867616596558348328.png?v=1" />
+  <meta property="og:url" content="https://guangcaiartwebsite.happyyo338.repl.co" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="光彩藝術網站" />
+  <meta name="twitter:description" content="讓你的照片變得更加豐富多彩" />
+  <meta name="twitter:image" content="https://cdn.discordapp.com/emojis/867616596558348328.png?v=1" />
+  <meta name="twitter:url" content="https://guangcaiartwebsite.happyyo338.repl.co" />
+  <link rel="stylesheet" type="text/css" href="./style.css" />
+  <link rel="icon" type="image/x-icon" href="pic/favicon.ico"/>
+
+    <style>
+      .wrapper {
+        width: 80%;
+        max-width: 980px;
+        margin: auto;
+        text-align: center;
+      }
+
+      canvas {
+        border: 2px solid black;
+      }
+
+      #download_frame {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <canvas id="canvas" width="400" height="300"></canvas>
+      <div class="wrapper">
+        <input type="file" id="upload">
+        <button id="download">下載圖片</button>
+      </div>
+    </div>
+
+    <script>
+      function downloadImage() {
+        var canvas = document.getElementById('canvas');
+        var a = document.createElement('a');
+
+        a.href = canvas.toDataURL();
+        a.download = 'image.png';
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      function uploadImage() {
+        var file = this.files[0];
+        var imageType = /^image\//;
+        var preview = document.getElementById('preview');
+
+        if (!imageType.test(file.type)) {
+          console.log("哦不!它不是圖像");
+          return;
+        }
+
+        var img = new Image();
+        img.file = file;
+
+        var reader = new FileReader();
+        reader.onload = (function(aImg) {
+          return function(e) {
+            aImg.src = e.target.result;
+            aImg.onload = function() {
+              applyFilters(aImg);
+            }
+          };
+        })(img);
+
+        reader.readAsDataURL(file);
+      }
+
+      function applyFilters(image) {
+        var canvas = document.getElementById('canvas');
+
+        if (canvas.getContext) {
+          var context = canvas.getContext('2d');
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0);
+
+          // Apply the Gradient
+          var gradientCanvas = document.createElement('canvas');
+          var gradientContext = gradientCanvas.getContext('2d');
+          var gradient = gradientContext.createLinearGradient(0, 0, canvas.width, 0);
+          gradient.addColorStop('0', 'blue');
+          gradient.addColorStop('0.5', 'green');
+          gradient.addColorStop('1.0', 'blue');
+          gradientContext.fillStyle = gradient;
+          gradientContext.fillRect(0, 0, canvas.width, canvas.height);
+
+          context.globalCompositeOperation = 'multiply';
+          context.drawImage(gradientCanvas, 0, 0, canvas.width, canvas.height);
+
+          // Apply the Logo
+          var logo = new Image();
+          logo.src = 'logo.png';
+          logo.onload = function() {
+            context.globalCompositeOperation = 'screen';
+            context.drawImage(logo, 10, canvas.height - logo.height - 10, logo.width, logo.height);
+          }
+        }
+      }
+
+      function initialize() {
+        var button = document.getElementById('download');
+        button.addEventListener('click', downloadImage);
+
+        var input = document.getElementById('upload');
+        input.addEventListener('change', uploadImage, false);
+      }
+
+      initialize();
+    </script>
+  </body>
+</html>
